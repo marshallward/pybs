@@ -2,11 +2,12 @@
 #include <pbs_ifl.h>
 #include <pbs_error.h>
 
+#include "pbsdoc.h"
 
-static PyObject*
-connect(PyObject *self, PyObject *args)
+static PyObject *
+pbsmod_connect(PyObject *self, PyObject *args)
 {
-    // TODO: This also should probably create a "server" variable in pbs
+    // TODO: Server name should also be stored in ``pbs.server``
     char *server = NULL;
     int id;
     
@@ -18,40 +19,65 @@ connect(PyObject *self, PyObject *args)
 }
 
 
-static char
-connect_doc[] = 
-    "Connect to the PBS server.";
-
-
-static PyObject*
-disconnect(PyObject *self, PyObject *args)
+static PyObject *
+pbsmod_default(PyObject *self, PyObject *args)
 {
-    return NULL;
+    char *server;
+    
+    if (!PyArg_ParseTuple(args, ""))
+        return NULL;
+    
+    server = pbs_default();
+    return Py_BuildValue("s", server);
 }
 
 
-static char
-disconnect_doc[] = 
-    "Disconnect from the PBS server.";
+static PyObject *
+pbsmod_deljob(PyObject *self, PyObject *args)
+{
+    int connect;
+    char *job_id;
+    char *extend = NULL;
+    int rc;
+    
+    if(!PyArg_ParseTuple(args, "is|s", &connect, &job_id, &extend))
+        return NULL;
+    
+    rc = pbs_deljob(connect, job_id, extend);
+    return Py_BuildValue("i", rc);
+}
+
+    
+static PyObject *
+pbsmod_disconnect(PyObject *self, PyObject *args)
+{
+    // TODO: rc should also be saved in ``pbs.errno``
+    int connect;
+    int rc;
+    
+    if (!PyArg_ParseTuple(args, "i", &connect))
+        return NULL;
+    
+    rc = pbs_disconnect(connect);
+    return Py_BuildValue("i", rc);
+}
 
 
 static PyMethodDef
-pbs_methods[] = {
-    {"connect", connect, METH_VARARGS, connect_doc},
-    {"disconnect", disconnect, METH_VARARGS, disconnect_doc},
+pbsmod_methods[] = {
+    {"connect", pbsmod_connect, METH_VARARGS, pbsmod_connect_doc},
+    {"default", pbsmod_default, METH_VARARGS, pbsmod_default_doc},
+    {"deljob", pbsmod_deljob, METH_VARARGS, pbsmod_deljob_doc},
+    {"disconnect", pbsmod_disconnect, METH_VARARGS, pbsmod_disconnect_doc},
     {NULL, NULL}
 };
 
  
-static char
-pbs_doc[] =
-    "I am trying to make a python wrapper to the PBS C API.";
-
-
 PyMODINIT_FUNC
 initpbs()
 {
-    Py_InitModule3("pbs", pbs_methods, pbs_doc);
+    PyObject *m;
+    m = Py_InitModule3("pbs", pbsmod_methods, pbsmod_doc);
 }
 
 
@@ -60,6 +86,6 @@ main(int argc, char **argv)
 {
     Py_SetProgramName(argv[0]);
     Py_Initialize();
-
+    
     initpbs();
 }

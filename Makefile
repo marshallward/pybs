@@ -12,13 +12,14 @@ CC = icc
 CC_FLAGS = -fPIC -I$(PY_INC) -I$(PBS_INC) -g
 LD_FLAGS = -shared -L$(PBS_LIB) -lpbs -lmunge
 
+HEADERS = $(wildcard *.h)
 SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:.c=.o)
 
 $(EXEC): $(OBJECTS)
 	$(CC) -o $@ $< $(LD_FLAGS)
 
-%.o: %.c
+%.o: %.c $(HEADERS)
 	$(CC) -c -o $@ $< $(CC_FLAGS)
 
 clean:

@@ -1,3 +1,9 @@
+/*  Python interface to the PBS C API
+ *  Author: Marshall Ward <marshall.ward@gmail.com>
+ * ----------------------------------------------------------------------------
+ *  Distributed as part of Pybs, Copyright 2012 Marshall Ward
+ */
+
 #include <Python.h>
 #include <pbs_ifl.h>
 #include <pbs_error.h>

@@ -19,5 +19,10 @@ pbsmod_disconnect_doc[] =
 
 
 static char
+pbsmod_submit_doc[] = 
+    "Submit a PBS batch job.";
+
+
+static char
 pbsmod_doc[] =
     "I am trying to make a python wrapper to the PBS C API.";

@@ -10,6 +10,7 @@
 
 #include "pbsdoc.h"
 
+
 static PyObject *
 pbsmod_connect(PyObject *self, PyObject *args)
 {
@@ -53,7 +54,7 @@ pbsmod_deljob(PyObject *self, PyObject *args)
     return Py_BuildValue("i", rc);
 }
 
-    
+
 static PyObject *
 pbsmod_disconnect(PyObject *self, PyObject *args)
 {
@@ -69,12 +70,40 @@ pbsmod_disconnect(PyObject *self, PyObject *args)
 }
 
 
+static PyObject *
+pbsmod_submit(PyObject *self, PyObject *args)
+{
+    // TODO: I don't know how to handle ``attrib``
+    int connect;
+    struct attropl *attrib = NULL;
+    char *script = NULL;
+    char *destination = NULL;
+    char *extend = NULL;
+    char *job_id;
+    
+    if(!PyArg_ParseTuple(args, "i|Osss", &connect, &attrib, &script,
+                            &destination, &extend))
+        return NULL;
+   
+    // Testing
+    attrib = NULL;
+    script = "script.sh";
+    destination = NULL;
+    extend = NULL;
+
+    job_id = pbs_submit(connect, attrib, script, destination, extend);
+    
+    return Py_BuildValue("s", job_id);
+}
+
+
 static PyMethodDef
 pbsmod_methods[] = {
     {"connect", pbsmod_connect, METH_VARARGS, pbsmod_connect_doc},
     {"default", pbsmod_default, METH_VARARGS, pbsmod_default_doc},
     {"deljob", pbsmod_deljob, METH_VARARGS, pbsmod_deljob_doc},
     {"disconnect", pbsmod_disconnect, METH_VARARGS, pbsmod_disconnect_doc},
+    {"submit", pbsmod_submit, METH_VARARGS, pbsmod_submit_doc},
     {NULL, NULL}
 };
 

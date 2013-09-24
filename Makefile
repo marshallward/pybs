@@ -8,7 +8,7 @@ PBS_PATH = /opt/pbs/default
 PBS_INC = $(PBS_PATH)/include
 PBS_LIB = $(PBS_PATH)/lib
 
-CC = gcc
+CC = icc
 CC_FLAGS = -fPIC -I$(PY_INC) -I$(PBS_INC) -g
 LD_FLAGS = -shared -L$(PBS_LIB) -lpbs -lmunge -lssl -pthread
 

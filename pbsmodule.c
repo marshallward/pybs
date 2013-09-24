@@ -17,10 +17,10 @@ pbsmod_connect(PyObject *self, PyObject *args)
     // TODO: Server name should also be stored in ``pbs.server``
     char *server = NULL;
     int id;
-    
+
     if (!PyArg_ParseTuple(args, "|s", &server))
         return NULL;
-    
+
     id = pbs_connect(server);
     return Py_BuildValue("i", id);
 }
@@ -30,10 +30,10 @@ static PyObject *
 pbsmod_default(PyObject *self, PyObject *args)
 {
     char *server;
-    
+
     if (!PyArg_ParseTuple(args, ""))
         return NULL;
-    
+
     server = pbs_default();
     return Py_BuildValue("s", server);
 }
@@ -46,10 +46,10 @@ pbsmod_deljob(PyObject *self, PyObject *args)
     char *job_id;
     char *extend = NULL;
     int rc;
-    
+
     if(!PyArg_ParseTuple(args, "is|s", &connect, &job_id, &extend))
         return NULL;
-    
+
     rc = pbs_deljob(connect, job_id, extend);
     return Py_BuildValue("i", rc);
 }
@@ -61,12 +61,19 @@ pbsmod_disconnect(PyObject *self, PyObject *args)
     // TODO: rc should also be saved in ``pbs.errno``
     int connect;
     int rc;
-    
+
     if (!PyArg_ParseTuple(args, "i", &connect))
         return NULL;
-    
+
     rc = pbs_disconnect(connect);
     return Py_BuildValue("i", rc);
+}
+
+
+static PyObject *
+pbsmod_selectjob(PyObject *self, PyObject *args)
+{
+    
 }
 
 
@@ -80,11 +87,11 @@ pbsmod_submit(PyObject *self, PyObject *args)
     char *destination = NULL;
     char *extend = NULL;
     char *job_id;
-    
+
     if(!PyArg_ParseTuple(args, "i|Osss", &connect, &attrib, &script,
                             &destination, &extend))
         return NULL;
-   
+
     // Testing
     attrib = NULL;
     script = "script.sh";
@@ -92,7 +99,7 @@ pbsmod_submit(PyObject *self, PyObject *args)
     extend = NULL;
 
     job_id = pbs_submit(connect, attrib, script, destination, extend);
-    
+
     return Py_BuildValue("s", job_id);
 }
 
@@ -107,12 +114,14 @@ pbsmod_methods[] = {
     {NULL, NULL}
 };
 
- 
+
 PyMODINIT_FUNC
 initpbs()
 {
     PyObject *m;
     m = Py_InitModule3("pbs", pbsmod_methods, pbsmod_doc);
+
+    initattropl(m);
 }
 
 
@@ -121,6 +130,6 @@ main(int argc, char **argv)
 {
     Py_SetProgramName(argv[0]);
     Py_Initialize();
-    
+
     initpbs();
 }

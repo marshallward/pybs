@@ -17,7 +17,7 @@ SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:.c=.o)
 
 $(EXEC): $(OBJECTS)
-	$(CC) -o $@ $< $(LD_FLAGS)
+	$(CC) -o $@ $^ $(LD_FLAGS)
 
 %.o: %.c $(HEADERS)
 	$(CC) -c -o $@ $< $(CC_FLAGS)

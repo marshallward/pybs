@@ -9,6 +9,10 @@
 
 typedef struct {
     PyObject_HEAD
+    PyObject *name;
+    PyObject *resource;
+    PyObject *value;
+    PyObject *op;
 } attroplObject;
 
 

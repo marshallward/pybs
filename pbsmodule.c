@@ -121,7 +121,7 @@ initpbs()
     PyObject *m;
     m = Py_InitModule3("pbs", pbsmod_methods, pbsmod_doc);
 
-    init_attropl(m);
+    initattropl(m);
 }
 
 

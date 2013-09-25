@@ -130,7 +130,7 @@ static PyTypeObject attropl_type = {
     0,                                          /* tp_setattro */
     0,                                          /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */
-    "attropl type",                             /* tp_doc */
+    "attropl objects",                          /* tp_doc */
     0,                                          /* tp_traverse */
     0,                                          /* tp_clear */
     0,                                          /* tp_richcompare */
@@ -155,9 +155,9 @@ static PyTypeObject attropl_type = {
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
-init_attropl(PyObject *m)
+initattropl(PyObject *m)
 {
-    attropl_type.tp_new = PyType_GenericNew;
+    //attropl_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&attropl_type) < 0)
         return;
 

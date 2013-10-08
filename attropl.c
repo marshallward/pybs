@@ -7,15 +7,7 @@
 #include <pbs_error.h>
 #include <structmember.h>
 
-
-typedef struct {
-    PyObject_HEAD
-    PyObject *name;
-    PyObject *resource;
-    PyObject *value;
-    int op;
-} attropl;
-
+#include "attropl.h"
 
 static void
 attropl_dealloc(attropl *self)

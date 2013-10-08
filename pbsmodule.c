@@ -1,15 +1,15 @@
 /*  Python interface to the PBS C API
  *  Author: Marshall Ward <marshall.ward@gmail.com>
  * ----------------------------------------------------------------------------
- *  Distributed as part of Pybs, Copyright 2012 Marshall Ward
+ *  Distributed as part of PyBS, Copyright 2012 Marshall Ward
  */
 
 #include <Python.h>
 #include <pbs_ifl.h>
 #include <pbs_error.h>
 
+#include "attropl.h"
 #include "pbsdoc.h"
-
 
 static PyObject *
 pbsmod_connect(PyObject *self, PyObject *args)
@@ -73,7 +73,26 @@ pbsmod_disconnect(PyObject *self, PyObject *args)
 static PyObject *
 pbsmod_selectjob(PyObject *self, PyObject *args)
 {
+    int server_id;
+    PyObject *attribs_in;
+    PyListObject *attrib_list;
+
+    int rc;
+
+    if (!PyArg_ParseTuple(args, "iO", &server_id, &attribs_in))
+        return NULL;
+
+    if (!PyList_Check(attribs_in))
+        // TODO: Safely exit
+        printf("oops not a list\n");
+    else
+        attrib_list = (PyListObject *)attribs_in;
+
     
+
+    // Temporary
+    rc = 0;
+    return Py_BuildValue("i", rc);
 }
 
 
@@ -110,6 +129,7 @@ pbsmod_methods[] = {
     {"default", pbsmod_default, METH_VARARGS, pbsmod_default_doc},
     {"deljob", pbsmod_deljob, METH_VARARGS, pbsmod_deljob_doc},
     {"disconnect", pbsmod_disconnect, METH_VARARGS, pbsmod_disconnect_doc},
+    {"selectjob", pbsmod_selectjob, METH_VARARGS, NULL},
     {"submit", pbsmod_submit, METH_VARARGS, pbsmod_submit_doc},
     {NULL, NULL}
 };

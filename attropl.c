@@ -12,6 +12,7 @@ typedef struct {
     PyObject *name;
     PyObject *resource;
     PyObject *value;
+    int op;
 } attropl;
 
 
@@ -50,6 +51,9 @@ attropl_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             Py_DECREF(self);
             return NULL;
         }
+
+        /* TODO: Reference batch_op.DFLT = 10 */
+        self->op = 10;
     }
 
     return (PyObject *)self;
@@ -61,10 +65,10 @@ attropl_init(attropl *self, PyObject *args, PyObject *kwds)
 {
     PyObject *name=NULL, *resource=NULL, *value=NULL, *tmp;
 
-    static char *kwlist[] = {"name", "resource", "value", NULL};
+    static char *kwlist[] = {"name", "resource", "value", "op", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOO", kwlist,
-                &name, &resource, &value))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOOi", kwlist,
+                &name, &resource, &value, &self->op))
         return -1;
 
     if (name) {
@@ -104,6 +108,8 @@ static PyMemberDef attropl_members[] = {
         "resource name"},
     {"value", T_OBJECT_EX, offsetof(attropl, value), 0,
         "attribute value"},
+    {"op", T_INT, offsetof(attropl, op), 0,
+        "attribute batch operator"},
     {NULL}
 };
 

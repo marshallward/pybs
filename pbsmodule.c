@@ -122,6 +122,7 @@ initpbs()
     m = Py_InitModule3("pbs", pbsmod_methods, pbsmod_doc);
 
     initattropl(m);
+    initbatch_op(m);
 }
 
 

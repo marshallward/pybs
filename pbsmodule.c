@@ -74,21 +74,33 @@ static PyObject *
 pbsmod_selectjob(PyObject *self, PyObject *args)
 {
     int server_id;
-    PyObject *attribs_in;
-    PyListObject *attrib_list;
-
     int rc;
+    PyObject *attribs;
 
-    if (!PyArg_ParseTuple(args, "iO", &server_id, &attribs_in))
+    int i, len;
+    PyObject *elem;
+
+    if (!PyArg_ParseTuple(args, "iO", &server_id, &attribs))
         return NULL;
 
-    if (!PyList_Check(attribs_in))
-        // TODO: Safely exit
+    // TODO: Safely exit
+    if (!PyList_Check(attribs))
         printf("oops not a list\n");
-    else
-        attrib_list = (PyListObject *)attribs_in;
 
-    
+    // Testing list contents
+    // TODO: Build an attropl chain
+
+    len = (int)PyList_Size(attribs);
+    for(i = 0; i < len; i++)
+    {
+        elem = PyList_GetItem(attribs, i);
+        printf("%i %s\n", i, PyString_AsString(elem));
+        // TODO: Process attropl element here
+    }
+
+    // TODO: call pbs_selectjob()
+
+    // TODO: Parse output into a python list
 
     // Temporary
     rc = 0;

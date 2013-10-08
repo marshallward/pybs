@@ -6,16 +6,21 @@
 #include <pbs_ifl.h>
 #include <pbs_error.h>
 
-char *ops[] = {"SET", "UNSET", "INCR", "DECR", "EQ", "NE", "GE", "GT", "LE",
-               "LT", "DFLT", NULL};
+
+char *ops[] = {"SET", "UNSET", "INCR", "DECR",
+               "EQ", "NE", "GE", "GT", "LE", "LT",
+               "DFLT", NULL};
+
 
 typedef struct {
     PyObject_HEAD
 } batch_op;
 
+
 static PyMethodDef batch_op_methods[] = {
     {NULL}
 };
+
 
 static PyTypeObject batch_op_type = {
     PyObject_HEAD_INIT(NULL)
@@ -41,6 +46,7 @@ static PyTypeObject batch_op_type = {
     Py_TPFLAGS_DEFAULT,                         /* tp_flags */
     "job batch operators"                       /* tp_doc */
 };
+
 
 #ifndef PyMODINIT_FUNC
 #define PyMODINIT_FUNC void

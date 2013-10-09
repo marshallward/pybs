@@ -75,14 +75,14 @@ attropl_init(attropl *self, PyObject *args, PyObject *kwds)
         tmp = self->resource;
         Py_INCREF(resource);
         self->resource = resource;
-        Py_XDECREF(resource);
+        Py_XDECREF(tmp);
     }
 
     if (value) {
         tmp = self->value;
         Py_INCREF(value);
         self->value = value;
-        Py_XDECREF(value);
+        Py_XDECREF(tmp);
     }
 
     return 0;

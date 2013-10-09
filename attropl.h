@@ -3,6 +3,7 @@
  */
 
 #include <Python.h>
+#include <pbs_ifl.h>
 
 typedef struct {
     PyObject_HEAD
@@ -11,3 +12,5 @@ typedef struct {
     PyObject *value;
     int op;
 } attropl;
+
+typedef struct attropl attropl_c;

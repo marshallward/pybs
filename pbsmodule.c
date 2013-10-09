@@ -73,38 +73,90 @@ pbsmod_disconnect(PyObject *self, PyObject *args)
 static PyObject *
 pbsmod_selectjob(PyObject *self, PyObject *args)
 {
+    // Python input fields
     int server_id;
-    int rc;
-    PyObject *attribs;
+    PyObject *attribs_py;
 
-    int i, len;
-    PyObject *elem;
+    // Internal C fields
+    int i, len, rc;
+    char **jobs;
 
-    if (!PyArg_ParseTuple(args, "iO", &server_id, &attribs))
+    PyObject *elem, *attr_py, *jobs_list, *jobs_str;
+    attropl_c **attribs_c;
+    attropl_c *attr_c;
+
+    if (!PyArg_ParseTuple(args, "iO", &server_id, &attribs_py))
         return NULL;
 
     // TODO: Safely exit
-    if (!PyList_Check(attribs))
+    if (!PyList_Check(attribs_py))
         printf("oops not a list\n");
 
     // Testing list contents
     // TODO: Build an attropl chain
 
-    len = (int)PyList_Size(attribs);
+    len = (int)PyList_Size(attribs_py);
+    attribs_c = malloc(len * sizeof(attropl_c *)); 
+
+    // Pack list elements into a struct linked list
     for(i = 0; i < len; i++)
     {
-        elem = PyList_GetItem(attribs, i);
-        printf("%i %s\n", i, PyString_AsString(elem));
-        // TODO: Process attropl element here
+        elem = PyList_GetItem(attribs_py, i);
+
+        attr_c = malloc(sizeof(attropl_c));
+        attribs_c[i] = attr_c;
+
+        attr_py = PyObject_GetAttrString(elem, "name");
+        if (attr_py != NULL) {
+            Py_INCREF(attr_py);
+            attr_c->name = PyString_AsString(attr_py);
+            Py_DECREF(attr_py);
+        }
+
+        attr_py = PyObject_GetAttrString(elem, "resource");
+        if (attr_py != NULL) {
+            Py_INCREF(attr_py);
+            attr_c->resource = PyString_AsString(attr_py);
+            Py_DECREF(attr_py);
+        }
+
+        attr_py = PyObject_GetAttrString(elem, "value");
+        if (attr_py != NULL) {
+            Py_INCREF(attr_py);
+            attr_c->value = PyString_AsString(attr_py);
+            Py_DECREF(attr_py);
+        }
+
+        attr_py = PyObject_GetAttrString(elem, "op");
+        if (attr_py != NULL) {
+            Py_INCREF(attr_py);
+            attr_c->op = (enum batch_op)PyLong_AsLong(attr_py);
+            Py_DECREF(attr_py);
+        }
+
+        if (i > 0) attribs_c[i-1]->next = attr_c;
+    }
+    attribs_c[len-1]->next = NULL;
+
+    jobs = pbs_selectjob(server_id, attribs_c[0], NULL);
+    
+    // TODO: Parse output into a python list
+    jobs_list = PyList_New(len);
+    Py_INCREF(jobs_list);
+
+    for (i = 0; i < len; i++)
+    {
+        jobs_str = PyString_FromString(jobs[i]);
+        Py_INCREF(jobs_str);
+        PyList_SetItem(jobs_list, i, jobs_str);
     }
 
-    // TODO: call pbs_selectjob()
+    // Clean up
+    for (i = 0; i < len; i++)
+        free(attribs_c[i]);
+    free(attribs_c);
 
-    // TODO: Parse output into a python list
-
-    // Temporary
-    rc = 0;
-    return Py_BuildValue("i", rc);
+    return jobs_list;
 }
 
 

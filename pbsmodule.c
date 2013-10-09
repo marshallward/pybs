@@ -193,7 +193,7 @@ pbsmod_methods[] = {
     {"default", pbsmod_default, METH_VARARGS, pbsmod_default_doc},
     {"deljob", pbsmod_deljob, METH_VARARGS, pbsmod_deljob_doc},
     {"disconnect", pbsmod_disconnect, METH_VARARGS, pbsmod_disconnect_doc},
-    {"selectjob", pbsmod_selectjob, METH_VARARGS, NULL},
+    {"selectjob", pbsmod_selectjob, METH_VARARGS, pbsmod_selectjob_doc},
     {"submit", pbsmod_submit, METH_VARARGS, pbsmod_submit_doc},
     {NULL, NULL}
 };

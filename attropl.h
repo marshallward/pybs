@@ -2,6 +2,9 @@
  * Contact: Marshall Ward <pbs@marshallward.org>
  */
 
+#ifndef ATTROPL_H
+#define ATTROPL_H
+
 #include <Python.h>
 #include <pbs_ifl.h>
 
@@ -14,3 +17,5 @@ typedef struct {
 } attropl;
 
 typedef struct attropl attropl_c;
+
+#endif  /* !defined(ATTROPL_H) */

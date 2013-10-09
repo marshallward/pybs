@@ -92,9 +92,7 @@ pbsmod_selectjob(PyObject *self, PyObject *args)
     if (!PyList_Check(attribs_py))
         printf("oops not a list\n");
 
-    // Testing list contents
-    // TODO: Build an attropl chain
-
+    // Construct the attropl linked list
     len = (int)PyList_Size(attribs_py);
     attribs_c = malloc(len * sizeof(attropl_c *)); 
 
@@ -165,13 +163,14 @@ pbsmod_submit(PyObject *self, PyObject *args)
 {
     // TODO: I don't know how to handle ``attrib``
     int connect;
-    struct attropl *attrib = NULL;
+    PyObject *attrib_py = NULL;
+    attropl_c *attrib;
     char *script = NULL;
     char *destination = NULL;
     char *extend = NULL;
     char *job_id;
 
-    if(!PyArg_ParseTuple(args, "i|Osss", &connect, &attrib, &script,
+    if(!PyArg_ParseTuple(args, "i|Osss", &connect, &attrib_py, &script,
                             &destination, &extend))
         return NULL;
 

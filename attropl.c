@@ -10,7 +10,7 @@
 #include "attropl.h"
 
 static void
-attropl_dealloc(attropl *self)
+attropl_dealloc(attropl_py *self)
 {
     Py_XDECREF(self->name);
     Py_XDECREF(self->resource);
@@ -22,9 +22,9 @@ attropl_dealloc(attropl *self)
 static PyObject *
 attropl_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    attropl *self;
+    attropl_py *self;
 
-    self = (attropl *)type ->tp_alloc(type, 0);
+    self = (attropl_py *)type ->tp_alloc(type, 0);
     if (self != NULL) {
 
         self->name = PyString_FromString("");
@@ -54,7 +54,7 @@ attropl_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 
 static int
-attropl_init(attropl *self, PyObject *args, PyObject *kwds)
+attropl_init(attropl_py *self, PyObject *args, PyObject *kwds)
 {
     PyObject *name=NULL, *resource=NULL, *value=NULL, *tmp;
 
@@ -95,13 +95,13 @@ static PyMethodDef attropl_methods[] = {
 
 
 static PyMemberDef attropl_members[] = {
-    {"name", T_OBJECT_EX, offsetof(attropl, name), 0,
+    {"name", T_OBJECT_EX, offsetof(attropl_py, name), 0,
         "attribute name"},
-    {"resource", T_OBJECT_EX, offsetof(attropl, resource), 0,
+    {"resource", T_OBJECT_EX, offsetof(attropl_py, resource), 0,
         "resource name"},
-    {"value", T_OBJECT_EX, offsetof(attropl, value), 0,
+    {"value", T_OBJECT_EX, offsetof(attropl_py, value), 0,
         "attribute value"},
-    {"op", T_INT, offsetof(attropl, op), 0,
+    {"op", T_INT, offsetof(attropl_py, op), 0,
         "attribute batch operator"},
     {NULL}
 };
@@ -111,7 +111,7 @@ static PyTypeObject attropl_type = {
     PyObject_HEAD_INIT(NULL)
     0,                                          /* ob_size */
     "pbs.attropl",                              /* tp_name */
-    sizeof(attropl),                            /* tp_basicsize */
+    sizeof(attropl_py),                         /* tp_basicsize */
     0,                                          /* tp_itemsize */
     (destructor)attropl_dealloc,                /* tp_dealloc */
     0,                                          /* tp_print */

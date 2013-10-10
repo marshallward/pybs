@@ -11,6 +11,37 @@
 #include "attropl.h"
 #include "pbsdoc.h"
 
+static PyObject *PbsError;
+
+static PyObject *
+pbsmod_alterjob(PyObject *self, PyObject *args)
+{
+    // Python input variables
+    int connect;
+    char *job_id;
+    PyObject *attrib_list;
+    char *extend;
+
+    // Internal variables
+    int len;
+    attrl_py **attribs_c;
+    attrl_py *attrib_c;
+    int rc;
+
+    if (!PyArg_ParseTuple(args, "is|Os",
+                          &connect, &job_id, &attrib_list, &extend))
+        return NULL;
+
+    // TODO: attrib support
+    len = (int)PyList_Size(attrib_list);
+    attribs_c = malloc(len * sizeof(attrl_py *));
+    attrib_c = malloc(sizeof(attrl_py *));
+
+    rc = pbs_alterjob(connect, job_id, NULL, extend);
+
+    return Py_BuildValue("i", rc);
+}
+
 static PyObject *
 pbsmod_connect(PyObject *self, PyObject *args)
 {
@@ -18,7 +49,8 @@ pbsmod_connect(PyObject *self, PyObject *args)
     char *server = NULL;
     int id;
 
-    if (!PyArg_ParseTuple(args, "|s", &server))
+    if (!PyArg_ParseTuple(args, "|s",
+                          &server))
         return NULL;
 
     id = pbs_connect(server);
@@ -51,6 +83,11 @@ pbsmod_deljob(PyObject *self, PyObject *args)
         return NULL;
 
     rc = pbs_deljob(connect, job_id, extend);
+    if (rc != 0) {
+        PyErr_SetString(PbsError, pbs_geterrmsg(connect));
+        return NULL;
+    }
+
     return Py_BuildValue("i", rc);
 }
 
@@ -66,6 +103,7 @@ pbsmod_disconnect(PyObject *self, PyObject *args)
         return NULL;
 
     rc = pbs_disconnect(connect);
+
     return Py_BuildValue("i", rc);
 }
 
@@ -74,34 +112,40 @@ static PyObject *
 pbsmod_selectjob(PyObject *self, PyObject *args)
 {
     // Python input fields
-    int server_id;
-    PyObject *attribs_py;
+    int connect;
+    PyObject *attrib_list;
+    char *extend;
 
     // Internal C fields
     int i, len, rc;
     char **jobs;
 
     PyObject *elem, *attr_py, *jobs_list, *jobs_str;
-    attropl_c **attribs_c;
-    attropl_c *attr_c;
+    attropl **attribs_c;
+    attropl *attr_c;
 
-    if (!PyArg_ParseTuple(args, "iO", &server_id, &attribs_py))
+    if (!PyArg_ParseTuple(args, "iO|s",
+                          &connect, &attrib_list, &extend))
         return NULL;
 
-    // TODO: Safely exit
-    if (!PyList_Check(attribs_py))
-        printf("oops not a list\n");
+    if (!PyList_Check(attrib_list)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "Second argument must be an attribute list");
+        return NULL;
+    }
 
     // Construct the attropl linked list
-    len = (int)PyList_Size(attribs_py);
-    attribs_c = malloc(len * sizeof(attropl_c *)); 
+    // TODO: Move to subroutine in `attropl.c`
+    len = (int)PyList_Size(attrib_list);
+    attribs_c = malloc(len * sizeof(attropl_py *));
 
     // Pack list elements into a struct linked list
     for(i = 0; i < len; i++)
     {
-        elem = PyList_GetItem(attribs_py, i);
+        elem = PyList_GetItem(attrib_list, i);
+        // TODO: Check element type
 
-        attr_c = malloc(sizeof(attropl_c));
+        attr_c = malloc(sizeof(attropl_py));
         attribs_c[i] = attr_c;
 
         attr_py = PyObject_GetAttrString(elem, "name");
@@ -136,8 +180,8 @@ pbsmod_selectjob(PyObject *self, PyObject *args)
     }
     attribs_c[len-1]->next = NULL;
 
-    jobs = pbs_selectjob(server_id, attribs_c[0], NULL);
-    
+    jobs = pbs_selectjob(connect, attribs_c[0], extend);
+
     // TODO: Parse output into a python list
     jobs_list = PyList_New(len);
     Py_INCREF(jobs_list);
@@ -161,14 +205,14 @@ pbsmod_selectjob(PyObject *self, PyObject *args)
 static PyObject *
 pbsmod_submit(PyObject *self, PyObject *args)
 {
-    // TODO: I don't know how to handle ``attrib``
     int connect;
     PyObject *attrib_py = NULL;
-    attropl_c *attrib;
+    attropl_py *attrib;
     char *script = NULL;
     char *destination = NULL;
     char *extend = NULL;
     char *job_id;
+    PyObject *job_output;
 
     if(!PyArg_ParseTuple(args, "i|Osss", &connect, &attrib_py, &script,
                             &destination, &extend))
@@ -180,9 +224,17 @@ pbsmod_submit(PyObject *self, PyObject *args)
     destination = NULL;
     extend = NULL;
 
-    job_id = pbs_submit(connect, attrib, script, destination, extend);
+    // TODO: Need to construct attrib
+    job_id = pbs_submit(connect, NULL, script, destination, extend);
+    if (job_id == NULL) {
+        PyErr_SetString(PbsError, pbs_geterrmsg(connect));
+        free(job_id);
+    }
 
-    return Py_BuildValue("s", job_id);
+    job_output = Py_BuildValue("s", job_id);
+    free(job_id);
+
+    return job_output;
 }
 
 
@@ -203,6 +255,12 @@ initpbs()
 {
     PyObject *m;
     m = Py_InitModule3("pbs", pbsmod_methods, pbsmod_doc);
+    if (m == NULL)
+        return;
+
+    PbsError = PyErr_NewException("pbs.error", NULL, NULL);
+    Py_INCREF(PbsError);
+    PyModule_AddObject(m, "error", PbsError);
 
     initbatch_op(m);
     initattropl(m);

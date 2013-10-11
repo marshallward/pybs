@@ -9,7 +9,7 @@ PBS_INC = $(PBS_PATH)/include
 PBS_LIB = $(PBS_PATH)/lib
 
 CC = icc
-CC_FLAGS = -fPIC -I$(PY_INC) -I$(PBS_INC) -g
+CC_FLAGS = -fPIC -I$(PY_INC) -I$(PBS_INC) -g -Wall
 LD_FLAGS = -shared -L$(PBS_LIB) -lpbs -lmunge -lssl -pthread
 
 HEADERS = $(wildcard *.h)

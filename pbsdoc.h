@@ -35,4 +35,4 @@ static char
 pbsmod_doc[] =
     "I am trying to make a python wrapper to the PBS C API.";
 
-#endif  /* !defined(PBSMOD_H) */
+#endif  /* PBSDOC_H */

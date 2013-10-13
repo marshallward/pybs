@@ -2,6 +2,11 @@
 #define PBSDOC_H
 
 static char
+pbsmod_alterjob_doc[] =
+    "Alter PBS batch job.";
+
+
+static char
 pbsmod_connect_doc[] =
     "Connect to a PBS batch server.";
 

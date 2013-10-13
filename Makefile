@@ -1,6 +1,6 @@
 EXEC = pbs.so
 
-PY_PATH = /apps/python/2.7.3
+PY_PATH = /apps/python/2.7.5
 PY_INC = $(PY_PATH)/include/python2.7
 PY_LIB = $(PY_PATH)/lib
 

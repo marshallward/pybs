@@ -25,6 +25,9 @@ typedef struct attrpol_py attrl_py;
 typedef struct attropl_py attropl_py;
 
 /* Function prototypes */
-attropl *attropl_list_gen(PyObject *);
+attropl *attropl_gen(PyObject *);
+attrl *attrl_gen(PyObject *);
+void attropl_free(attropl *);
+void attrl_free(attrl *);
 
 #endif  /* ATTROPL_H */

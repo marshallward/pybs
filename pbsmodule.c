@@ -26,15 +26,16 @@ pbsmod_alterjob(PyObject *self, PyObject *args)
     attrl *attrib_head;
     int rc;
 
+    attrib_list = NULL;
+    extend = NULL;
     if (!PyArg_ParseTuple(args, "is|Os",
                           &connect, &job_id, &attrib_list, &extend))
         return NULL;
 
-    // TODO: attrib support
-    attrib_head = (attrl *)attropl_list_gen(attrib_list);
+    attrib_head = attrl_gen(attrib_list);
     rc = pbs_alterjob(connect, job_id, attrib_head, extend);
 
-    attropl_list_free((attropl *)attrib_head);
+    attrl_free(attrib_head);
 
     return Py_BuildValue("i", rc);
 }
@@ -43,9 +44,10 @@ static PyObject *
 pbsmod_connect(PyObject *self, PyObject *args)
 {
     // TODO: Server name should also be stored in ``pbs.server``
-    char *server = NULL;
+    char *server;
     int id;
 
+    server = NULL;
     if (!PyArg_ParseTuple(args, "|s",
                           &server))
         return NULL;
@@ -73,9 +75,10 @@ pbsmod_deljob(PyObject *self, PyObject *args)
 {
     int connect;
     char *job_id;
-    char *extend = NULL;
+    char *extend;
     int rc;
 
+    extend = NULL;
     if(!PyArg_ParseTuple(args, "is|s", &connect, &job_id, &extend))
         return NULL;
 
@@ -119,23 +122,23 @@ pbsmod_selectjob(PyObject *self, PyObject *args)
     char **jobs;
     PyObject *jobs_list, *jobs_str;
 
-    if (!PyArg_ParseTuple(args, "iO|s",
+    attrib_list = NULL;
+    extend = NULL;
+    if (!PyArg_ParseTuple(args, "i|Os",
                           &connect, &attrib_list, &extend))
         return NULL;
 
-    if (!PyList_Check(attrib_list)) {
+    if (attrib_list && !PyList_Check(attrib_list)) {
         PyErr_SetString(PyExc_TypeError,
                         "Second argument must be an attribute list");
         return NULL;
     }
 
-    attr_head = attropl_list_gen(attrib_list);
+    attr_head = attropl_gen(attrib_list);
     jobs = pbs_selectjob(connect, attr_head, extend);
 
-    // TODO: Parse output into a python list
-    // First count number of elements
-    len = 0;
-    while (jobs[len]) len++;
+    /* Pre-count the number of elements */
+    for (len = 0; jobs[len]; len++);
 
     jobs_list = PyList_New(len);
     Py_INCREF(jobs_list);
@@ -146,7 +149,7 @@ pbsmod_selectjob(PyObject *self, PyObject *args)
         PyList_SetItem(jobs_list, i, jobs_str);
     }
 
-    attropl_list_free(attr_head);
+    attropl_free(attr_head);
     return jobs_list;
 }
 
@@ -154,30 +157,33 @@ pbsmod_selectjob(PyObject *self, PyObject *args)
 static PyObject *
 pbsmod_submit(PyObject *self, PyObject *args)
 {
+    // Python input fields
     int connect;
-    PyObject *attrib_py = NULL;
-    attropl_py *attrib;
-    char *script = NULL;
-    char *destination = NULL;
-    char *extend = NULL;
+    PyObject *attrib_list;
+    char *script;
+    char *destination;
+    char *extend;
+
+    // Internal variables
+    attropl *attrib_head;
     char *job_id;
     PyObject *job_output;
 
-    if(!PyArg_ParseTuple(args, "i|Osss", &connect, &attrib_py, &script,
-                            &destination, &extend))
-        return NULL;
-
-    // Testing
-    attrib = NULL;
-    script = "script.sh";
+    attrib_list = NULL;
+    script = NULL;
     destination = NULL;
     extend = NULL;
+    if(!PyArg_ParseTuple(args, "i|Osss", &connect, &attrib_list, &script,
+                         &destination, &extend))
+        return NULL;
 
-    // TODO: Need to construct attrib
-    job_id = pbs_submit(connect, NULL, script, destination, extend);
+    attrib_head = attropl_gen(attrib_list);
+
+    job_id = pbs_submit(connect, attrib_head, script, destination, extend);
     if (job_id == NULL) {
         PyErr_SetString(PbsError, pbs_geterrmsg(connect));
         free(job_id);
+        return NULL;
     }
 
     job_output = Py_BuildValue("s", job_id);
@@ -189,6 +195,7 @@ pbsmod_submit(PyObject *self, PyObject *args)
 
 static PyMethodDef
 pbsmod_methods[] = {
+    {"alterjob", pbsmod_alterjob, METH_VARARGS, pbsmod_alterjob_doc},
     {"connect", pbsmod_connect, METH_VARARGS, pbsmod_connect_doc},
     {"default", pbsmod_default, METH_VARARGS, pbsmod_default_doc},
     {"deljob", pbsmod_deljob, METH_VARARGS, pbsmod_deljob_doc},

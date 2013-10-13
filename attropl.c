@@ -10,7 +10,7 @@
 #include "attropl.h"
 
 static void
-attropl_dealloc(attropl_py *self)
+attropl_py_free(attropl_py *self)
 {
     Py_XDECREF(self->name);
     Py_XDECREF(self->resource);
@@ -20,7 +20,7 @@ attropl_dealloc(attropl_py *self)
 
 
 static PyObject *
-attropl_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+attropl_py_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     attropl_py *self;
 
@@ -90,7 +90,7 @@ attropl_init(attropl_py *self, PyObject *args, PyObject *kwds)
 
 
 attropl *
-attropl_list_gen(PyObject *attropl_list)
+attropl_gen(PyObject *attropl_list)
 {
     int i, len;
     PyObject *attr_py, *member_py;
@@ -99,6 +99,9 @@ attropl_list_gen(PyObject *attropl_list)
     // TODO: Iterate over attr_members (My C-fu is currently too weak)
     static char *attr_members[] = {"name", "resource", "value", NULL};
     char *mname;
+
+    if (!attropl_list)
+        return NULL;
 
     len = PyList_Size(attropl_list);
     if (!len)
@@ -152,8 +155,8 @@ attropl_list_gen(PyObject *attropl_list)
 
 
 void
-attropl_list_free(attropl *attr) {
-
+attropl_free(attropl *attr)
+{
     attropl *attr_next;
 
     while (attr) {
@@ -161,6 +164,21 @@ attropl_list_free(attropl *attr) {
         free(attr);
         attr = attr_next;
     }
+}
+
+
+/* attrl wrapper functions */
+attrl *
+attrl_gen(PyObject *attrl_list)
+{
+    return (attrl *)attropl_gen(attrl_list);
+}
+
+
+void
+attrl_free(attrl *attr)
+{
+    attropl_free((attropl *)attr);
 }
 
 
@@ -188,7 +206,7 @@ static PyTypeObject attropl_type = {
     "pbs.attropl",                              /* tp_name */
     sizeof(attropl_py),                         /* tp_basicsize */
     0,                                          /* tp_itemsize */
-    (destructor)attropl_dealloc,                /* tp_dealloc */
+    (destructor)attropl_py_free,                /* tp_dealloc */
     0,                                          /* tp_print */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
@@ -221,7 +239,7 @@ static PyTypeObject attropl_type = {
     0,                                          /* tp_dictoffset */
     (initproc)attropl_init,                     /* tp_init */
     0,                                          /* tp_alloc */
-    attropl_new                                 /* tp_new */
+    attropl_py_new                              /* tp_new */
 };
 
 

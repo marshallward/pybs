@@ -24,7 +24,6 @@ pbsmod_alterjob(PyObject *self, PyObject *args)
 
     // Internal variables
     attrl *attrib_head;
-    int rc;
 
     attrib_list = NULL;
     extend = NULL;
@@ -33,11 +32,14 @@ pbsmod_alterjob(PyObject *self, PyObject *args)
         return NULL;
 
     attrib_head = attrl_gen(attrib_list);
-    rc = pbs_alterjob(connect, job_id, attrib_head, extend);
+    if (pbs_alterjob(connect, job_id, attrib_head, extend))
+    {
+        PyErr_SetString(PbsError, pbs_geterrmsg(connect));
+        return NULL;
+    }
 
     attrl_free(attrib_head);
-
-    return Py_BuildValue("i", rc);
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -220,6 +222,7 @@ initpbs()
 
     initbatch_op(m);
     initattropl(m);
+    initbatch_status(m);
 }
 
 

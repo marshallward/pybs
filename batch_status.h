@@ -20,4 +20,4 @@ struct batch_status_py {
 
 typedef struct batch_status_py batch_status_py;
 
-#endif  /* BATCH_STATUS_H */
+#endif  /* !BATCH_STATUS_H */

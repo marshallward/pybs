@@ -10,7 +10,7 @@
 #include "attropl.h"
 
 static void
-attropl_py_free(attropl_py *self)
+attropl_py_dealloc(attropl_py *self)
 {
     Py_XDECREF(self->name);
     Py_XDECREF(self->resource);
@@ -206,7 +206,7 @@ static PyTypeObject attropl_type = {
     "pbs.attropl",                              /* tp_name */
     sizeof(attropl_py),                         /* tp_basicsize */
     0,                                          /* tp_itemsize */
-    (destructor)attropl_py_free,                /* tp_dealloc */
+    (destructor)attropl_py_dealloc,             /* tp_dealloc */
     0,                                          /* tp_print */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */

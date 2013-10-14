@@ -30,4 +30,4 @@ attrl *attrl_gen(PyObject *);
 void attropl_free(attropl *);
 void attrl_free(attrl *);
 
-#endif  /* ATTROPL_H */
+#endif  /* !ATTROPL_H */

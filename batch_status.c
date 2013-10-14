@@ -11,7 +11,7 @@
 #include "batch_status.h"
 
 static void
-batch_status_py_free(batch_status_py *self)
+batch_status_py_dealloc(batch_status_py *self)
 {
     Py_XDECREF(self->name);
     Py_XDECREF(self->attribs);
@@ -25,7 +25,7 @@ batch_status_py_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     batch_status_py *self;
 
-    self = (batch_status_py *)type ->tp_alloc(type, 0);
+    self = (batch_status_py *)type->tp_alloc(type, 0);
     if (self != NULL) {
 
         self->name = PyString_FromString("");
@@ -102,7 +102,7 @@ static PyTypeObject batch_status_type = {
     "pbs.batch_status",                         /* tp_name */
     sizeof(batch_status_py),                    /* tp_basicsize */
     0,                                          /* tp_itemsize */
-    (destructor)batch_status_py_free,           /* tp_dealloc */
+    (destructor)batch_status_py_dealloc,        /* tp_dealloc */
     0,                                          /* tp_print */
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
@@ -133,9 +133,9 @@ static PyTypeObject batch_status_type = {
     0,                                          /* tp_descr_get */
     0,                                          /* tp_descr_set */
     0,                                          /* tp_dictoffset */
-    (initproc)batch_status_init,                     /* tp_init */
+    (initproc)batch_status_init,                /* tp_init */
     0,                                          /* tp_alloc */
-    batch_status_py_new                              /* tp_new */
+    batch_status_py_new                         /* tp_new */
 };
 
 
